@@ -12,7 +12,14 @@ public class ViewAngle2D : MonoBehaviour
     /// 시아에 보이는 오브젝트들
     /// Object that is visible in the view angle
     /// </summary>
-    [HideInInspector] public List<GameObject> ObjectsInView;
+    private List<GameObject> objectsInView;
+    public GameObject[] ObjectsInView
+    {
+        get
+        {
+            return objectsInView.ToArray();
+        }
+    }
 
     [SerializeField] LayerMask _targetMask;
     [SerializeField] LayerMask _obstacleMask;
@@ -40,7 +47,7 @@ public class ViewAngle2D : MonoBehaviour
         Gizmos.DrawLine(transform.position, transform.position + left);
         Gizmos.DrawLine(transform.position, transform.position + right);
 
-        foreach (GameObject obj in ObjectsInView)
+        foreach (GameObject obj in objectsInView)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawLine(transform.position, obj.transform.position);
@@ -49,14 +56,14 @@ public class ViewAngle2D : MonoBehaviour
 
     private void isCanSee(Transform target)
     {
-        Vector3 direction = (target.position - transform.position).normalized;
-        float angle = Vector3.Angle(direction, transform.up);
+        Vector2 direction = (target.position - transform.position).normalized;
+        float angle = Vector2.Angle(direction, transform.up);
         if (angle < _viewAngle / 2)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, _viewDistance, _obstacleMask);
             if (hit.collider == null || hit.collider.gameObject == target.gameObject)
             {
-                ObjectsInView.Add(target.gameObject);
+                objectsInView.Add(target.gameObject);
             }
         }
     }
@@ -64,7 +71,7 @@ public class ViewAngle2D : MonoBehaviour
     private void findObjectsInView()
     {
         Collider2D[] targetsinDistance;
-        ObjectsInView.Clear();
+        objectsInView.Clear();
         targetsinDistance = Physics2D.OverlapCircleAll(transform.position, _viewDistance, _targetMask);
 
         foreach (var target in targetsinDistance)
